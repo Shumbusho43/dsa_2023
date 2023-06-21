@@ -4,6 +4,7 @@
 #include <fstream>
 #include <string>
 #include <algorithm>
+#include <regex>
 using namespace std;
 // to upper case function to convert the string to upper case
 string toUpperCase(const string &str)
@@ -105,6 +106,30 @@ void addItem(string item_id, string item_name, string quantity, string registrat
         cout << "Item name already exists." << endl;
         return;
     }
+    /// validation registration date using regex
+    regex dateRegex("\\d{4}-\\d{2}-\\d{2}");
+    if (!regex_match(registration_date, dateRegex))
+    {
+        cout << "Invalid registration date format. Correct format: YYYY-MM-DD." << endl;
+        return;
+    }
+    // check if entered year,month or day is not greater than current year,month or day
+    int year = stoi(subStringer(registration_date, '-', 0));
+    if (year > 2023)
+    {
+        cout << "invalid year entered" << endl;
+        return;
+    }
+    // Check if the quantity is a number
+    try
+    {
+        int quantityInt = stoi(quantity);
+    }
+    catch (const std::exception &e)
+    {
+        cout << "Invalid quantity." << endl;
+        return;
+    }
 
     // Open the file
     ofstream MyFile("items.csv", ios::app);
@@ -124,6 +149,21 @@ void addItem(string item_id, string item_name, string quantity, string registrat
         cout << "Unable to open the file" << endl;
     }
 }
+#include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <algorithm>
+using namespace std;
+
+bool compareItemNames(const string &item1, const string &item2)
+{
+    string itemName1 = subStringer(item1, ',', 1);
+    string itemName2 = subStringer(item2, ',', 1);
+    transform(itemName1.begin(), itemName1.end(), itemName1.begin(), ::tolower);
+    transform(itemName2.begin(), itemName2.end(), itemName2.begin(), ::tolower);
+    return itemName1 < itemName2;
+}
 
 void listItems()
 {
@@ -137,7 +177,8 @@ void listItems()
             items.push_back(line);
         }
 
-        sort(items.begin(), items.end());
+        sort(items.begin(), items.end(), compareItemNames);
+
         for (const auto &item : items)
         {
             string itemId = subStringer(item, ',', 0);
@@ -145,7 +186,8 @@ void listItems()
             string quantity = subStringer(item, ',', 2);
             string regDate = subStringer(item, ',', 3);
 
-            cout << "Item ID:" << itemId << "       Item Name:" << itemName << "       Quantity:" << quantity << "       Reg Date:" << regDate << endl;
+            cout << "Item ID: " << itemId << "\t Item Name: " << itemName
+                 << "\t Quantity: " << quantity << "\t Reg Date: " << regDate << endl;
         }
 
         inputFile.close();
