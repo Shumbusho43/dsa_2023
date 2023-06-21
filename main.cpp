@@ -5,6 +5,8 @@
 #include <string>
 #include <algorithm>
 #include <regex>
+#include <cctype>
+#include <chrono>
 using namespace std;
 // to upper case function to convert the string to upper case
 string toUpperCase(const string &str)
@@ -106,20 +108,6 @@ void addItem(string item_id, string item_name, string quantity, string registrat
         cout << "Item name already exists." << endl;
         return;
     }
-    /// validation registration date using regex
-    regex dateRegex("\\d{4}-\\d{2}-\\d{2}");
-    if (!regex_match(registration_date, dateRegex))
-    {
-        cout << "Invalid registration date format. Correct format: YYYY-MM-DD." << endl;
-        return;
-    }
-    // check if entered year,month or day is not greater than current year,month or day
-    int year = stoi(subStringer(registration_date, '-', 0));
-    if (year > 2023)
-    {
-        cout << "invalid year entered" << endl;
-        return;
-    }
     // Check if the quantity is a number
     try
     {
@@ -128,6 +116,65 @@ void addItem(string item_id, string item_name, string quantity, string registrat
     catch (const std::exception &e)
     {
         cout << "Invalid quantity." << endl;
+        return;
+    }
+    // check if id is a number
+    try
+    {
+        int idInt = stoi(item_id);
+    }
+    catch (const std::exception &e)
+    {
+        cout << "Invalid id, please enter a number" << endl;
+        return;
+    }
+    // Check if item_name is a string (contains alphabetic characters only)
+    for (char c : item_name)
+    {
+        if (!isalpha(c))
+        {
+            cout << "Invalid item name. Please enter a string." << endl;
+            return;
+        }
+    }
+    int quantityInt = stoi(quantity);
+    if (quantityInt < 0)
+    {
+        cout << "Invalid quantity. Please enter a non-negative integer." << endl;
+        return;
+    }
+
+    // Validate registration date using regex
+    regex dateRegex("\\d{4}-\\d{2}-\\d{2}");
+    if (!regex_match(registration_date, dateRegex))
+    {
+        cout << "Invalid registration date format. Correct format: YYYY-MM-DD." << endl;
+        return;
+    }
+
+    // Parse the registration date components
+    int year = stoi(subStringer(registration_date, '-', 0));
+    int month = stoi(subStringer(registration_date, '-', 1));
+    int day = stoi(subStringer(registration_date, '-', 2));
+
+    // Get the current date
+    time_t currentTime = time(nullptr);
+    tm *currentTm = localtime(&currentTime);
+
+    // Check if entered year, month, or day is not greater than the current year, month, or day
+    if (year > currentTm->tm_year + 1900)
+    {
+        cout << "Invalid year entered." << endl;
+        return;
+    }
+    if (year == currentTm->tm_year + 1900 && month > currentTm->tm_mon + 1)
+    {
+        cout << "Invalid month entered." << endl;
+        return;
+    }
+    if (year == currentTm->tm_year + 1900 && month == currentTm->tm_mon + 1 && day > currentTm->tm_mday)
+    {
+        cout << "Invalid day entered." << endl;
         return;
     }
 
@@ -224,6 +271,11 @@ int main()
             string item_name = subStringer(command, ' ', 2);
             string quantity = subStringer(command, ' ', 3);
             string registration_date = subStringer(command, ' ', 4);
+            if (subStringer(command, ' ', 5) != "" || item_id == "" || item_name == "" || quantity == "" || registration_date == "")
+            {
+                cout << "invalid command, format must be itemadd <item_id> <item_name> <quantity> <registration_date>" << endl;
+                continue;
+            }
             addItem(item_id, item_name, quantity, registration_date);
         }
 
