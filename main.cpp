@@ -149,12 +149,6 @@ void addItem(string item_id, string item_name, string quantity, string registrat
         cout << "Unable to open the file" << endl;
     }
 }
-#include <iostream>
-#include <string>
-#include <vector>
-#include <fstream>
-#include <algorithm>
-using namespace std;
 
 bool compareItemNames(const string &item1, const string &item2)
 {
@@ -186,8 +180,8 @@ void listItems()
             string quantity = subStringer(item, ',', 2);
             string regDate = subStringer(item, ',', 3);
 
-            cout << "Item ID: " << itemId << "\t Item Name: " << itemName
-                 << "\t Quantity: " << quantity << "\t Reg Date: " << regDate << endl;
+            cout << "Item ID:" << itemId << "\t Item Name:" << itemName
+                 << "\t Quantity :" << quantity << "\t Reg Date :" << regDate << endl;
         }
 
         inputFile.close();
@@ -239,7 +233,7 @@ int main()
             listItems();
         }
         // Exit program if command is "exit"
-        else if (command == "exit")
+        else if (toLowerCase(command) == "exit")
         {
             cout << "Exiting Inventory System." << endl;
             break;
